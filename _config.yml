@@ -1,0 +1,8 @@
+title: Elizabeth
+description: Elizabeth is a library to generate dummy data. This library easy to use and very useful when you need to bootstrap a database.
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-minimal
+
+gems:
+  - jekyll-mentions
