@@ -142,7 +142,8 @@ and call the one from methods:
 ```
 
 Output:
-```python
+
+```
 'Antonetta Garrison'
 'Taneka Dickerson'
 'Jackelyn Stafford'
