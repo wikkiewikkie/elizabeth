@@ -1,41 +1,47 @@
 ## Elizabeth
 [![Build Status](https://travis-ci.org/lk-geimfari/elizabeth.svg?branch=master)](https://travis-ci.org/lk-geimfari/elizabeth)
+[![codecov](https://codecov.io/gh/lk-geimfari/elizabeth/branch/master/graph/badge.svg)](https://codecov.io/gh/lk-geimfari/elizabeth)
 [![Documentation Status](https://readthedocs.org/projects/elizabeth/badge/?version=latest)](http://elizabeth.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/elizabeth.svg)](https://badge.fury.io/py/elizabeth)
 [![Python Version](https://img.shields.io/badge/python-v3.3%2C%20v3.4%2C%20v3.5%2C%20v3.6-brightgreen.svg)](https://github.com/lk-geimfari/elizabeth/)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d773f20efa67430683bb24fff5af9db8)](https://www.codacy.com/app/likid-geimfari/church)
-
-
-Elizabeth is a library to generate dummy data. It's very useful when you need to bootstrap your database. Elizabeth doesn't have any dependencies.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/lk-geimfari/elizabeth/master/other/elizabeth_1.png">
   <br>
 </p>
 
+**Elizabeth** is a fast and easier to use Python library for generating dummy data. These data are very useful when you need to bootstrap the database in the testing phase of your software. A great example of how you can use the library are web applications on Flask or Django which need a data, such as users (email, username, name, surname etc.), posts (tags, text, title, publishing date and etc.) and so forth. The library uses the JSON files as a datastore and doesn’t have any dependencies. The library offers more than 18 different data providers (from personal ones to transport and more).
 
 
 ## Documentation
-Elizabeth is a pretty simple library and all you need to start is the small documentation. See Elizabeth's Sphinx-generated documentation here: [http://elizabeth.readthedocs.io/en/latest/](http://elizabeth.readthedocs.io/en/latest/)
+Elizabeth is a pretty simple library and all you need to start is the small documentation. See Elizabeth's Sphinx-generated documentation here: [http://elizabeth.readthedocs.io/en/latest/](http://elizabeth.readthedocs.io/)
 
 ## Locales
 
-At this moment a library has 15 supported locales:
- - da
- - de
- - en
- - es
- - fi
- - fr
- - is
- - it
- - nl
- - no
- - sv
- - ru
- - pt
- - pt-br
- - pl
+At this moment a library has 17 supported locales:
+
+| №  | Flag  | Code       | Name                 | Native name |
+|--- |---   |---        |---                |---         |
+| 1  | 🇩🇰   |  `da`      | Danish               | Dansk       |
+| 2  | 🇩🇪   |  `de`      | German               | Deutsch     |
+| 3  | 🇺🇸   |  `en`      | English              | English     |
+| 4  | 🇬🇧   |  `en-gb`   | British English      | English     |
+| 5  | 🇪🇸   |  `es`      | Spanish              | Español     |
+| 6  | 🇮🇷   |  `fa`      | Farsi                |      فارسی  |
+| 7  | 🇫🇮   |  `fi`      | Finnish              | Suomi       |
+| 8  | 🇫🇷   |  `fr`      | French               | Français    |
+| 9  | 🇮🇸   |  `is`      | Icelandic            | Íslenska    |
+| 10 | 🇮🇹   |  `it`      | Italian              | Italiano    |
+| 11 | 🇳🇱   |  `nl`      | Dutch                | Nederlands  |
+| 12 | 🇳🇴   |  `no`      | Norwegian            | Norsk       |
+| 13 | 🇵🇱   |  `pl`      | Polish               | Polski      |
+| 14 | 🇵🇹   |  `pt`      | Portuguese           | Português   |
+| 15 | 🇧🇷   |  `pt-br`   | Brazilian Portuguese | Português Brasileiro |
+| 16 | 🇷🇺   |  `ru`      | Russian              | Русский     |
+| 17 | 🇸🇪   |  `sv`      | Swedish              | Svenska     |
+
+
 
 
 ## Installation
@@ -50,103 +56,209 @@ At this moment a library has 15 supported locales:
 ➜  ~ python3 -m unittest discover tests
 ```
 
-## Examples
+## Using with Flask
 
-Below you can see, how to generate fake paths using `Elizabeth`:
+You can use `Elizabeth` with your Flask-application (with any other frameworks in a similar manner).
+
 ```python
->>> from elizabeth import Path
->>> path = Path()
+# Some logic
+# ...
+class Patient(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True)
+    phone_number = db.Column(db.String(25))
+    full_name = db.Column(db.String(100))
+    weight = db.Column(db.String(64))
+    height = db.Column(db.String(64))
+    blood_type = db.Column(db.String(64))
+    age = db.Column(db.Integer)
 
->>> path.root
-'/'
+    def __init__(self, **kwargs):
+        super(Patient, self).__init__(**kwargs)
 
->>> path.home
-'/home/'
+    @staticmethod
+    def _bootstrap(count=2000, locale='en'):
+        from elizabeth import Personal
 
->>> path.user(gender='female')
-'/home/chieko'
+        person = Personal(locale)
 
->>> path.users_folder(user_gender='male')
-'/home/lyndon/Documents'
+        for _ in range(count):
+            patient = Patient(
+                email=person.email(),
+                phone_number=person.telephone(),
+                full_name=person.full_name(gender='female'),
+                age=person.age(minimum=18, maximum=45),
+                weight=person.weight(),
+                height=person.height(),
+                blood_type=person.blood_type()
+            )
 
->>> path.dev_dir(user_gender='female')
-'/home/edra/Development/Ruby'
-
->>> path.project_dir(user_gender='female')
-'/home/katharina/Development/C Shell/litany'
+            db.session.add(patient)
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
 ```
-or how to generate dummy model of transport:
+
+Just run shell mode
+```
+(venv) ➜ python3 manage.py shell
+```
+
+and do following:
+
 ```python
->>> from elizabeth import Transport
->>> transport = Transport()
+>>> db
+<SQLAlchemy engine='sqlite:///db_dev.sqlite'>
 
->>> transport.truck()
-'Union-0632 FX'
+>>> Patient
+<class 'app.models.Patient'>
 
->>> transport.truck(model_mask="##/@")
-'Jiaotong-78/P'
+>>> Patient()._bootstrap(count=1000, locale='en', gender='female')
+```
 
->>> transport.car()
-'Pontiac Grand Am'
+Result:
 
->>> transport.airplane()
-'Boeing 575'
+![en](https://raw.githubusercontent.com/lk-geimfari/elizabeth/master/other/screenshots/en_bootstrap.png)
 
->>> transport.airplane(model_mask="7##")
-'Airbus 778'
+
+## A common use
+
+Import a provider that you need
+
+```python
+>>>> from elizabeth import Personal
+```
+and create instance of provider that was be imported:
+
+```python
+>>> personal = Personal('en')
+```
+and call the one from methods:
+
+```python
+>>> for _ in range(0, 5):
+       personal.full_name(gender='female')
+```
+
+Output:
+```python
+'Antonetta Garrison'
+'Taneka Dickerson'
+'Jackelyn Stafford'
+'Tashia Olsen'
+'Rachal Hartman'
+```
+
+For other locales, exactly the same way (Icelandic) :
+
+```python
+>>> personal = Personal('is')
+
+>>> for _ in range(0, 5):
+        personal.full_name(gender='male')
+```
+
+Output:
+```python
+'Þórgrímur Garibaldason'
+'Zóphanías Bergfinnsson'
+'Vésteinn Ríkharðsson'
+'Hallvarður Valgarðsson'
+'Baltasar Hlégestsson'
 ```
 
 When you use only one locale you can use the `Generic` , that provides all providers at one class.
 
-This is a contrived example, but it illustrates how this works.
+```python
+>>> from elizabeth import Generic
+
+>>> g = Generic('en')
+
+>>> for _ in range(0, 5):
+        name = g.personal.name()
+        b_day = g.datetime.birthday()
+        "%s - %s" % (name, b_day)
+```
+
+Output:
+```python
+'Sharda - November 4, 2000'
+'Nevada - January 16, 1980'
+'Dreama - August 10, 1987'
+'Jani - July 30, 1989'
+'Chin - September 24, 1994'
+```
+
+## Custom provider
+You also can add custom provider to `Generic`.
 
 ```python
-from elizabeth import Generic
+>>> from elizabeth import Generic
 
-el = Generic('en')
+>>> generic = Generic('en')
 
+>>> class SomeProvider():
+        class Meta:
+            name = 'some_provider'
 
-def patient(gender='female'):
-    patient_card = {
-        'full_name': el.personal.full_name(gender=gender),
-        'gender': el.personal.gender(gender=gender),
-        'blood_type': el.person.blood_type(),
-        'birthday': el.datetime.birthday()
-    }
-return patient_card
+        def ints(self):
+            return [i for i in range(1, 5)]
+
+>>> class Another():
+        def bye(self):
+            return "Bye!"
+
+>>> generic.add_provider(SomeProvider)
+>>> generic.add_provider(Another)
+
+>>> generic.some_provider.ints()
+[1, 2, 3, 4]
+
+>>> generic.another.bye()
+'Bye!'
+```
+
+## Builtins specific data providers
+
+Every language has specific data that suit only for ones. For example `SSN` for `en` (USA) or `CPF` for `pt-br` (Brazil). `CPF` can be useful only for brazilians.
+
+If user want to use this providers then he must be imported explicitly.
+
+```python
+>>> from elizabeth import Generic
+>>> from elizabeth.builtins import Brazil
+
+>>> generic = Generic('pt-br')
+
+>>> class BrazilProvider(Brazil):
+        class Meta:
+            name = "brazil_provider"
+
+>>> generic.add_provider(BrazilProvider)
+>>> generic.brazil_provider.cpf()
+'001.137.297-40'
 ```
 
 ## Data providers
+Elizabeth support more than [18](https://github.com/lk-geimfari/elizabeth/blob/master/PROVIDERS.md) data providers, such as Personal, Datetime, Internet and [another](https://github.com/lk-geimfari/elizabeth/blob/master/PROVIDERS.md).
 
-| Provider        | Description                                                  |
-| -------------   |:-------------                                                |
-| Address         | *Address data (street name, street suffix etc.)*             |
-| Business        | *Business data (company, company_type, copyright etc.)*      |
-| Code            | *Codes (ISBN, EAN, IMEI etc.).*                              |
-| ClothingSizes   | *Clothing sizes (international sizes, european etc.)*        |
-| Datetime        | *Datetime (day_of_week, month, year etc.)*                   |
-| Development     | *Data for developers (version, programming language etc.)*   |
-| File            | *File data (extension etc.)*                                 |
-| Food            | *Information on food (vegetables, fruits, measurements etc.)*|
-| Personal        | *Personal data (name, surname, age, email etc.)*             |
-| Text            | *Text data (sentence, title etc.)*                           |
-| Transport       | *Dummy data about transport (truck model, car etc.)*         |
-| Network         | *Network data (IPv4, IPv6, MAC address) etc*                 |
-| Science         | *Scientific data (scientist, math_formula etc.)*             |
-| Internet        | *Dummy internet data (facebook, twitter etc.)*                |
-| Hardware        | *The data about the hardware (resolution, cpu, graphics etc.)*|
-| Numbers         | *Numerical data (floats, primes, digit etc.)*                 |
-| Path            | *Provides methods and property for generate paths.*           |
-| Generic         | *All at one*                                                  |
+## Comparison
+[Here](https://gist.github.com/lk-geimfari/461ce92fd32379d7b73c9e12164a9154) you can find very small comparison with Faker. Screenshot [here](http://i.imgur.com/ZqkE1k2.png).
+
+## Like it?
+You can say [thanks](https://saythanks.io/to/lk-geimfari)!
 
 
 ## Contributing
-Your contributions are always welcome! Please take a look at the [contribution](https://github.com/lk-geimfari/elizabeth/blob/master/CONTRIBUTING.md) guidelines first. [Here](https://github.com/lk-geimfari/elizabeth/blob/master/CONTRIBUTING.md) you can look a list of contributors
+Your contributions are always welcome! Please take a look at the [contribution](https://github.com/lk-geimfari/elizabeth/blob/master/CONTRIBUTING.md) guidelines first. [Here](https://github.com/lk-geimfari/elizabeth/blob/master/CONTRIBUTING.md#contributors) you can look a list of our contributors.
 
+## Changelog
+See [CHANGELOG.md](https://github.com/lk-geimfari/elizabeth/blob/master/CHANGELOG.md).
 
 ## Disclaimer
 The author does not assume any responsibility for how you will use this library and how you will use data generated with this library. This library is designed only for developers and only with good intentions. Do not use the data generated with `Elizabeth` for illegal purposes.
 
 
 ## Licence
-Elizabeth is licensed under the MIT License. See [LICENSE](https://github.com/lk-geimfari/elizabeth/blob/master/LICENSE)  for the full license text.
+Elizabeth is licensed under the [MIT License](https://github.com/lk-geimfari/elizabeth/blob/master/LICENSE). See [LICENSE](https://github.com/lk-geimfari/elizabeth/blob/master/LICENSE)  for the full license text.
