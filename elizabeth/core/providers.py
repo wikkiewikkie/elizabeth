@@ -29,8 +29,7 @@ from string import (
     punctuation
 )
 
-# intd (acronym International Data)
-import elizabeth.core.intd
+# intd (International Data)
 from elizabeth.core import intd
 
 from elizabeth.utils import (
@@ -119,7 +118,7 @@ class Address(object):
         """
         fmt = self.data['address_fmt']
 
-        if self.locale in elizabeth.core.intd.SHORTENED_ADDRESS_FMT:
+        if self.locale in intd.SHORTENED_ADDRESS_FMT:
             # Because fmt for ko is {st_name}{st_sfx} {st_num},
             # i.e not shortened address format
             if self.locale != 'ko':
@@ -179,7 +178,7 @@ class Address(object):
         if not fmt:
             fmt = 'iso2'
 
-        countries = elizabeth.core.intd.COUNTRIES_ISO[fmt]
+        countries = intd.COUNTRIES_ISO[fmt]
         return choice(countries)
 
     def country(self):
@@ -309,6 +308,19 @@ class Numbers(object):
         :return: Number
         """
         return randint(minimum, maximum)
+
+    @staticmethod
+    def rating(maximum=5.0):
+        """Generate random rating for something.
+
+        :param maximum: Minimum value (default is 5.0).
+        :return: Rating.
+        :rtype: float
+        :Example:
+            4.7
+        """
+        res = '{0:0.1f}'.format(uniform(0, maximum))
+        return float(res)
 
 
 class Structured(object):
@@ -634,6 +646,17 @@ class Text(object):
 
         return '{0:0.1f} {1}'.format(n, scale)
 
+    def answer(self):
+        """Get a random answer in current language.
+
+        :return: An answer.
+        :rtype: str
+        :Example:
+            No
+        """
+        answers = self.data['answers']
+        return choice(answers)
+
 
 class Code(object):
     """Class that provides methods for generating codes (isbn, asin & etc.)"""
@@ -691,7 +714,7 @@ class Code(object):
         :Example:
             132-1-15411-375-8.
         """
-        groups = elizabeth.core.intd.ISBN_GROUPS
+        groups = intd.ISBN_GROUPS
 
         mask = '###-{0}-#####-###-#' if \
             fmt == 'isbn-13' else '{0}-#####-###-#'
@@ -723,7 +746,7 @@ class Code(object):
         :Example:
         353918052107063
         """
-        num = choice(elizabeth.core.intd.IMEI_TACS) + self.custom_code(mask='######')
+        num = choice(intd.IMEI_TACS) + self.custom_code(mask='######')
         return num + luhn_checksum(num)
 
     def pin(self, mask='####'):
@@ -812,7 +835,7 @@ class Business(object):
         :Example:
             599.99 $.
         """
-        currencies = elizabeth.core.intd.CURRENCY_SYMBOLS
+        currencies = intd.CURRENCY_SYMBOLS
 
         price = uniform(minimum, maximum)
 
@@ -1590,7 +1613,7 @@ class Development(object):
         :Example:
             The BSD 3-Clause License.
         """
-        return choice(elizabeth.core.intd.LICENSES)
+        return choice(intd.LICENSES)
 
     @staticmethod
     def version():
@@ -1613,8 +1636,8 @@ class Development(object):
             PostgreSQL.
         """
         if nosql:
-            return choice(elizabeth.core.intd.NOSQL)
-        return choice(elizabeth.core.intd.SQL)
+            return choice(intd.NOSQL)
+        return choice(intd.SQL)
 
     @staticmethod
     def other():
@@ -1624,7 +1647,7 @@ class Development(object):
         :Example:
             Nginx.
         """
-        return choice(elizabeth.core.intd.OTHER_TECH)
+        return choice(intd.OTHER_TECH)
 
     @staticmethod
     def programming_language():
@@ -1634,7 +1657,7 @@ class Development(object):
         :Example:
             Erlang.
         """
-        return choice(elizabeth.core.intd.PROGRAMMING_LANGS)
+        return choice(intd.PROGRAMMING_LANGS)
 
     @staticmethod
     def backend():
@@ -1644,7 +1667,7 @@ class Development(object):
         :Example:
             Elixir/Phoenix
         """
-        return choice(elizabeth.core.intd.BACKEND)
+        return choice(intd.BACKEND)
 
     @staticmethod
     def frontend():
@@ -1654,7 +1677,7 @@ class Development(object):
         :Example:
             JS/React.
         """
-        return choice(elizabeth.core.intd.FRONTEND)
+        return choice(intd.FRONTEND)
 
     @staticmethod
     def os():
@@ -1664,7 +1687,7 @@ class Development(object):
         :Example:
             Gentoo
         """
-        return choice(elizabeth.core.intd.OS)
+        return choice(intd.OS)
 
     @staticmethod
     def stackoverflow_question():
@@ -2069,6 +2092,16 @@ class Internet(object):
         """
         return choice(intd.USER_AGENTS)
 
+    @staticmethod
+    def protocol():
+        """Get a random protocol.
+
+        :return: Protocol.
+        :Example:
+            https
+        """
+        return choice(['http', 'https'])
+
 
 class Transport(object):
     """Class that provides dummy data about transport."""
@@ -2177,8 +2210,8 @@ class Path(object):
         :Example:
             /home/sherrell/Development/Python/mercenary
         """
-        dev_folder = choice(('Development', 'Dev'))
-        stack = choice(elizabeth.core.intd.PROGRAMMING_LANGS)
+        dev_folder = choice(['Development', 'Dev'])
+        stack = choice(intd.PROGRAMMING_LANGS)
         user = self.user(user_gender)
 
         return os.path.join(user, dev_folder, stack)
@@ -2241,7 +2274,6 @@ class Generic(object):
         else:
             raise TypeError("Provider must be a class")
 
-    # TODO: Not cool. Refactor it.
     @property
     def personal(self):
         if callable(self._personal):
