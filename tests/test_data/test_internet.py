@@ -1,15 +1,22 @@
 # -*- coding: utf-8 -*-
 
-import pytest
 import re
 
-from elizabeth.core.providers import Internet
-from elizabeth.core.intd import (
-    SUBREDDITS, EMOJI, USER_AGENTS,
-    SUBREDDITS_NSFW, HASHTAGS
-)
+import pytest
 
-from ._patterns import HOME_PAGE
+from elizabeth.core.providers import Internet
+from elizabeth.intd import (
+    SUBREDDITS, EMOJI, USER_AGENTS,
+    SUBREDDITS_NSFW, HASHTAGS,
+    HTTP_METHODS, MIME_TYPES,
+    HTTP_STATUS_CODES
+)
+from ._patterns import (
+    HOME_PAGE,
+    IP_V6_REGEX,
+    IP_V4_REGEX,
+    MAC_ADDRESS_REGEX
+)
 
 
 @pytest.fixture
@@ -22,20 +29,15 @@ def test_emoji(net):
     assert result in EMOJI
 
 
-def test_facebook(net):
-    result = net.facebook(gender='female')
-    assert result is not None
-
-    _result = net.facebook(gender='female')
-    assert _result is not None
-
-
 def test_hashtags(net):
     result = net.hashtags(quantity=5)
     assert len(result) == 5
 
     result = net.hashtags(quantity=1, category='general')
-    assert result[0] in HASHTAGS['general']
+    assert result in HASHTAGS['general']
+
+    with pytest.raises(KeyError):
+        net.hashtags(category='religious')
 
 
 def test_home_page(net):
@@ -55,14 +57,6 @@ def test_subreddit(net):
 
     full_result = net.subreddit(nsfw=True, full_url=True)
     assert len(full_result) > 20
-
-
-def test_twitter(net):
-    result = net.twitter(gender='female')
-    assert result is not None
-
-    _result = net.twitter(gender='male')
-    assert _result is not None
 
 
 def test_user_agent(net):
@@ -98,3 +92,57 @@ def test_protocol(net):
     result = net.protocol()
     assert result is not None
     assert result in ['http', 'https']
+
+
+def test_ip_v4(net):
+    ip = net.ip_v4()
+    assert re.match(IP_V4_REGEX, ip)
+
+
+def test_ip_v6(net):
+    ip = net.ip_v6()
+    assert re.match(IP_V6_REGEX, ip)
+
+
+def test_mac_address(net):
+    mac = net.mac_address()
+    assert re.match(MAC_ADDRESS_REGEX, mac)
+
+
+def test_http_method(net):
+    result = net.http_method()
+    assert result in HTTP_METHODS
+
+
+def test_content_type(net):
+    application = net.content_type(mime_type='application')
+    application = application.split(':')[1].strip()
+    assert application in MIME_TYPES['application']
+
+    audio = net.content_type(mime_type='audio')
+    audio = audio.split(':')[1].strip()
+    assert audio in MIME_TYPES['audio']
+
+    image = net.content_type(mime_type='image')
+    image = image.split(':')[1].strip()
+    assert image in MIME_TYPES['image']
+
+    message = net.content_type(mime_type='message')
+    message = message.split(':')[1].strip()
+    assert message in MIME_TYPES['message']
+
+    text = net.content_type(mime_type='text')
+    text = text.split(':')[1].strip()
+    assert text in MIME_TYPES['text']
+
+    video = net.content_type(mime_type='video')
+    video = video.split(':')[1].strip()
+    assert video in MIME_TYPES['video']
+
+    with pytest.raises(ValueError):
+        net.content_type(mime_type='blablabla')
+
+
+def test_http_status_code(net):
+    result = net.http_status_code()
+    assert result in HTTP_STATUS_CODES

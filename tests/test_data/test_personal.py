@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import pytest
 import re
 
-from elizabeth.core.intd import (
+import pytest
+
+from elizabeth.exceptions import WrongArgument
+from elizabeth.intd import (
     FAVORITE_MUSIC_GENRE, SEXUALITY_SYMBOLS,
-    BLOOD_GROUPS, GENDER_SYMBOLS
+    BLOOD_GROUPS, GENDER_SYMBOLS, ENGLISH_LEVEL
 )
 
 from ._patterns import *
@@ -84,6 +86,11 @@ def test_email(personal):
     result = personal.email()
     assert re.match(EMAIL_REGEX, result)
 
+    domains = ["@example.com"]
+    result = personal.email(domains=domains)
+    assert re.match(EMAIL_REGEX, result)
+    assert result.split('@')[1] == 'example.com'
+
 
 def test_bitcoin(personal):
     result = personal.bitcoin()
@@ -152,6 +159,14 @@ def test_favorite_music_genre(personal):
     assert result in FAVORITE_MUSIC_GENRE
 
 
+def test_social_media_profile(personal):
+    result = personal.social_media_profile(gender='female')
+    assert result is not None
+
+    _result = personal.social_media_profile(gender='male')
+    assert _result is not None
+
+
 def test_avatar(personal):
     result = personal.avatar(size=512)
     img, size, *__ = result.split('/')[::-1]
@@ -171,15 +186,7 @@ def test_identifier(personal):
 
 def test_level_of_english(personal):
     result = personal.level_of_english()
-    lvl_s = ['Beginner',
-             'Elementary',
-             'Pre - Intermediate',
-             'Intermediate',
-             'Upper Intermediate',
-             'Advanced',
-             'Proficiency'
-             ]
-    assert result in lvl_s
+    assert result in ENGLISH_LEVEL
 
 
 def test_name(generic):
@@ -188,6 +195,9 @@ def test_name(generic):
 
     result = generic.personal.name(gender='male')
     assert result in generic.personal.data['names']['male']
+
+    with pytest.raises(WrongArgument):
+        generic.personal.name(gender='other')
 
 
 def test_telephone(generic):
@@ -209,6 +219,9 @@ def test_surname(generic):
 
         result = generic.personal.surname(gender='male')
         assert result in generic.personal.data['surnames']['male']
+
+        with pytest.raises(WrongArgument):
+            generic.personal.surname(gender='other')
     else:
         result = generic.personal.surname()
         assert result in generic.personal.data['surnames']
@@ -230,6 +243,12 @@ def test_gender(generic):
 
     symbol = generic.personal.gender(symbol=True)
     assert symbol in GENDER_SYMBOLS
+
+    # The four codes specified in ISO/IEC 5218 are:
+    # 0 = not known, 1 = male, 2 = female, 9 = not applicable.
+    codes = [0, 1, 2, 9]
+    iso5218 = generic.personal.gender(iso5218=True)
+    assert iso5218 in codes
 
 
 def test_sexual_orientation(generic):
@@ -281,6 +300,15 @@ def test_title(generic):
 
     result2 = generic.personal.title(title_type='academic')
     assert isinstance(result2, str)
+
+    result_fem = generic.personal.title(gender='female')
+    assert result_fem is not None
+
+    result_fem = generic.personal.title(gender='male')
+    assert result_fem is not None
+
+    with pytest.raises(WrongArgument):
+        generic.personal.title(gender='other', title_type='religious')
 
 
 def test_nationality(generic):

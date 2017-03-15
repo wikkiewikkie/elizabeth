@@ -1,24 +1,45 @@
 from distutils.core import setup
 
-from elizabeth import __version__, \
-    __author__
+from elizabeth import (
+    __author__,
+    __version__
+)
+
+with open('PYPI_README.rst', 'r', encoding='utf-8') as f:
+    readme = f.read()
 
 setup(
     name='elizabeth',
     version=__version__,
-    packages=['elizabeth', 'elizabeth.core', 'elizabeth.core.intd', 'elizabeth.builtins'],
-    keywords=['fake', 'data', 'testing', 'generate', 'elizabeth', 'db', 'church', 'dummy'],
+    packages=[
+        'elizabeth',
+        'elizabeth.core',
+        'elizabeth.intd',
+        'elizabeth.builtins'
+    ],
+    keywords=[
+        'db',
+        'fake',
+        'data',
+        'testing',
+        'generate',
+        'elizabeth',
+        'dummy'
+    ],
     package_data={
         'elizabeth': [
-            'data/*/*',
+            'data/*/*'
         ]
     },
+    data_files=[
+        ("", ["LICENSE", 'PYPI_README.rst'])
+    ],
     url='https://github.com/lk-geimfari/elizabeth',
-    license='MIT',
+    license='MIT License',
     author=__author__,
     author_email='likid.geimfari@gmail.com',
-    description='Elizabeth is a fast and easy to use Python library '
-                'for generating dummy data for a variety of purposes.',
+    description='Elizabeth: dummy data for you.',
+    long_description=readme,
     classifiers=[
         "Development Status :: 4 - Beta",
         'Intended Audience :: Developers',

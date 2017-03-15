@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 
-from elizabeth.core.intd import CURRENCY, CURRENCY_SYMBOLS
-
+from elizabeth.intd import CURRENCIES, CURRENCY_SYMBOLS
 from ._patterns import STR_REGEX
 
 
@@ -13,21 +12,11 @@ def test_str(business):
 def test_copyright(business):
     result = business.copyright()
     assert '©' in result
-    assert result is not None
-
-    result_1 = business.copyright(date=False)
-    assert '©' in result
-    assert result_1 is not None
-
-    result_args = business.copyright(minimum=1999, maximum=2010)
-    date = result_args.split()[1].split('-')
-    assert int(date[0]) >= 1999
-    assert int(date[1]) <= 2010
 
 
 def test_currency_sio(business):
     result = business.currency_iso()
-    assert result in CURRENCY
+    assert result in CURRENCIES
 
 
 def test_company_type(generic):

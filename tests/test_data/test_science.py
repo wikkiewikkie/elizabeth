@@ -2,8 +2,7 @@
 
 import re
 
-from elizabeth.core.intd import MATH_FORMULAS
-
+from elizabeth.intd import MATH_FORMULAS
 from ._patterns import STR_REGEX
 
 
@@ -19,11 +18,6 @@ def test_math_formula(science):
 def test_scientific_article(generic):
     result = generic.science.scientific_article()
     assert result in generic.science._data['article']
-
-
-def test_scientist(generic):
-    result = generic.science.scientist()
-    assert result in generic.science._data['scientist']
 
 
 def test_chemical_element(generic):

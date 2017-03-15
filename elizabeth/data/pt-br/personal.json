@@ -5418,18 +5418,20 @@
   "title": {
 	"female": {
 	  "typical": [
-		"Test"
+		"Sra"
 	  ],
 	  "academic": [
-		"Test"
+		"Dr.",
+		"Prof."
 	  ]
 	},
 	"male": {
 	  "typical": [
-		"Test"
+		"Sr"
 	  ],
 	  "academic": [
-		"Test"
+		"Dr.",
+		"Prof."
 	  ]
 	}
   },

@@ -31,12 +31,17 @@ def test_base_food(generic):
 
 
 def test_base_science(generic):
-    result = generic.science.scientist()
+    result = generic.science.scientific_article()
     assert result is not None
 
 
 def test_base_business(generic):
     result = generic.business.copyright()
+    assert result is not None
+
+
+def test_base_unit_system(generic):
+    result = generic.unit_system.mass()
     assert result is not None
 
 
@@ -50,7 +55,8 @@ def test_add_provider(generic):
         class Meta:
             name = 'custom_provider'
 
-        def say(self):
+        @staticmethod
+        def say():
             return 'Custom'
 
         @staticmethod

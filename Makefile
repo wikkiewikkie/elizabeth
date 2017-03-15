@@ -1,6 +1,6 @@
 ROOT=./
 
-VERSION = 0.3.15
+VERSION = 0.3.22
 PROJECT_NAME = Elizabeth
 REPOSITORY_URL = https://github.com/lk-geimfari/elizabeth
 
@@ -17,7 +17,7 @@ help:
 	@echo "\033[93m::::::::::::::::::::::::::::::::::::::::::::::::::::::::\033[0m"
 	@echo "\033[92mclean-pyc    - remove Python file artifacts\033[0m"
 	@echo "\033[92mclean-build  - remove build artifacts\033[0m"
-	@echo "\033[92mclean        - remove build and Python file artifacts\033[0m"
+	@echo "\033[92mclean        - remove build and Python file artifacts\033[0m"i
 	@echo "\033[92mtest         - run tests quickly with the default Python\033[0m"
 	@echo "\033[92mtest-travis  - run tests for Travis CI\033[0m"
 	@echo "\033[92mtest-files   - internal files for development\033[0m"
@@ -56,3 +56,6 @@ release-test:
 
 install:
 	python3 setup.py install
+
+minify-json:
+	gulp json
